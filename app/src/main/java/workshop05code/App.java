@@ -39,8 +39,10 @@ public class App {
         wordleDatabaseConnection.createNewDatabase("words.db");
         if (wordleDatabaseConnection.checkIfConnectionDefined()) {
             System.out.println("Wordle created and connected.");
+            // logger.info("Worlde created and connected");
         } else {
             System.out.println("Not able to connect. Sorry!");
+            // logger.info("Not able to connect. Sorry!");
             return;
         }
         if (wordleDatabaseConnection.createWordleTables()) {

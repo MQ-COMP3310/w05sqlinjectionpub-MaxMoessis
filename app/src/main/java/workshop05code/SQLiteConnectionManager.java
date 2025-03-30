@@ -27,7 +27,8 @@ public class SQLiteConnectionManager {
     try {// resources\logging.properties
       LogManager.getLogManager().readConfiguration(new FileInputStream("resources/logging.properties"));
     } catch (SecurityException | IOException e1) {
-      e1.printStackTrace();
+      // e1.printStackTrace(); 
+      System.err.println("An error occurred while trying to manage the logger");
     }
   }
 

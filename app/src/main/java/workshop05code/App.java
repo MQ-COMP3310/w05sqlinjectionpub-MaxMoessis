@@ -25,7 +25,8 @@ public class App {
         try {// resources\logging.properties
             LogManager.getLogManager().readConfiguration(new FileInputStream("resources/logging.properties"));
         } catch (SecurityException | IOException e1) {
-            e1.printStackTrace();
+            // e1.printStackTrace();
+            System.err.println("Error occurred while trying to manage the logger"); // using syserr rather than printing the stack trace. 
         }
     }
 
@@ -43,14 +44,14 @@ public class App {
             logger.log(Level.INFO,"Wordle created and connected.");
         } else {
             logger.log(Level.WARNING, "Unable to connect");
-            System.out.println("Unable to connected");
-            return;
-        }
+            System.out.println("Unable to connect");      // logger.info() was not printing to console 
+            return;                                         // so it seemed better to do this rather than 
+        }                                                   // make a console handler. 
         if (wordleDatabaseConnection.createWordleTables()) {
             logger.log(Level.INFO, "World structure in place");
         } else {
             logger.log(Level.WARNING, "Unable to launch.");
-            System.out.println("Unable to create word table :()");
+            System.out.println("Unable to create word table :(");
             return;
         }
 
@@ -97,7 +98,8 @@ public class App {
                 guess = scanner.nextLine();
             }
         } catch (NoSuchElementException | IllegalStateException e) {
-            e.printStackTrace();
+            // e.printStackTrace();
+            logger.log(Level.WARNING, "An error occurred while trying to let you guess");
         }
 
     }

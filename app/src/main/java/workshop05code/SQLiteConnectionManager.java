@@ -16,6 +16,9 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+// imported for input checking
+import java.util.regex.*;
+
 public class SQLiteConnectionManager {
   // Start code logging exercise
   static {
@@ -65,12 +68,11 @@ public class SQLiteConnectionManager {
     try (Connection conn = DriverManager.getConnection(databaseURL)) {
       if (conn != null) {
         DatabaseMetaData meta = conn.getMetaData();
-        System.out.println("The driver name is " + meta.getDriverName());
-        System.out.println("A new database has been created.");
-
+        logger.log(Level.INFO, "The driver name is " +meta.getDriverName());
+        logger.log(Level.INFO, "A new database has been created.");
       }
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.log(Level.WARNING, "Connection error", e);
     }
   }
 
@@ -89,7 +91,7 @@ public class SQLiteConnectionManager {
           return true;
         }
       } catch (SQLException e) {
-        System.out.println(e.getMessage());
+        logger.log(Level.WARNING, "Connection error", e);
         return false;
       }
     }
@@ -114,7 +116,7 @@ public class SQLiteConnectionManager {
         return true;
 
       } catch (SQLException e) {
-        System.out.println(e.getMessage());
+        logger.log(Level.WARNING, "Connection error", e);
         return false;
       }
     }
@@ -136,7 +138,7 @@ public class SQLiteConnectionManager {
       pstmt.setString(2, word);
       pstmt.executeUpdate();
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
+      logger.log(Level.WARNING, "Connection error", e);
     }
 
   }
@@ -145,28 +147,39 @@ public class SQLiteConnectionManager {
    * Possible weakness here?
    * 
    * @param guess the string to check if it is a valid word.
-   * @return true if guess exists in the database, false otherwise
+   * @return 2 if word isn't valid
+   * @return 1 if the word is valid and matches
+   * @return 0 if the word is valid but doesn't match.
    */
-  public boolean isValidWord(String guess) {
+  public int isValidWord(String guess) {
     // String sql = "SELECT count(id) as total FROM validWords WHERE word like '" + guess + "';";   // weak 
     String sql = "SELECT count(id) as total FROM validWords WHERE word like ?";   // secure
 
     try (Connection conn = DriverManager.getConnection(databaseURL);
         PreparedStatement stmt = conn.prepareStatement(sql)) {
-          
+
+        if (!guess.matches("^[a-z]{4}$")) {
+            return 2;
+        }
+
       stmt.setString(1, guess);   // security issue fix
       ResultSet resultRows = stmt.executeQuery();
       if (resultRows.next()) {
         int result = resultRows.getInt("total");
-        return (result >= 1);
+
+        if (result >= 1) {
+          return 1;
+        } else {
+          return 0;
+        }
+
       }
 
-      return false;
+      return 0;
 
     } catch (SQLException e) {
-      System.out.println(e.getMessage());
-      return false;
+      logger.log(Level.WARNING, "Connection error", e);
+      return 0;
     }
-
   }
 }

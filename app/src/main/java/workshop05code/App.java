@@ -11,6 +11,8 @@ import java.util.logging.Level;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
+import java.util.regex.*;
+
 /**
  *
  * @author sqlitetutorial.net
@@ -38,17 +40,17 @@ public class App {
 
         wordleDatabaseConnection.createNewDatabase("words.db");
         if (wordleDatabaseConnection.checkIfConnectionDefined()) {
-            System.out.println("Wordle created and connected.");
-            // logger.info("Worlde created and connected");
+            logger.log(Level.INFO,"Wordle created and connected.");
         } else {
-            System.out.println("Not able to connect. Sorry!");
-            // logger.info("Not able to connect. Sorry!");
+            logger.log(Level.WARNING, "Unable to connect");
+            System.out.println("Unable to connected");
             return;
         }
         if (wordleDatabaseConnection.createWordleTables()) {
-            System.out.println("Wordle structures in place.");
+            logger.log(Level.INFO, "World structure in place");
         } else {
-            System.out.println("Not able to launch. Sorry!");
+            logger.log(Level.WARNING, "Unable to launch.");
+            System.out.println("Unable to create word table :()");
             return;
         }
 
@@ -58,14 +60,17 @@ public class App {
             String line;
             int i = 1;
             while ((line = br.readLine()) != null) {
-                System.out.println(line);
-                wordleDatabaseConnection.addValidWord(i, line);
+                if (wordleDatabaseConnection.isValidWord(line) == 2) {
+                    logger.log(Level.SEVERE, "'"+line+"'" + " is an INVALID word, NOT added to database");
+                } else {
+                    logger.log(Level.INFO, "-- "+line+" --");
+                    wordleDatabaseConnection.addValidWord(i, line);
+                }
                 i++;
             }
 
         } catch (IOException e) {
-            System.out.println("Not able to load . Sorry!");
-            System.out.println(e.getMessage());
+            logger.log(Level.INFO, "Unable to load!", e);
             return;
         }
 
@@ -76,12 +81,16 @@ public class App {
             String guess = scanner.nextLine();
 
             while (!guess.equals("q")) {
-                System.out.println("You've guessed '" + guess+"'.");
 
-                if (wordleDatabaseConnection.isValidWord(guess)) { 
-                    System.out.println("Success! It is in the the list.\n");
-                }else{
-                    System.out.println("Sorry. This word is NOT in the the list.\n");
+                System.out.println("You've guessed '" +guess+ "'.");
+
+                if (wordleDatabaseConnection.isValidWord(guess) == 1) { 
+                    System.out.println("Success! It is in the the list.");
+                } else if (wordleDatabaseConnection.isValidWord(guess) == 0) {
+                    System.out.println("Sorry. This word is NOT in the the list.");
+                } else if (wordleDatabaseConnection.isValidWord(guess) == 2) {
+                    System.out.println("!!! INPUT INVALID !!!");
+                    logger.log(Level.INFO, "Invalid word entered: " + guess);
                 }
 
                 System.out.print("Enter a 4 letter word for a guess or q to quit: " );
